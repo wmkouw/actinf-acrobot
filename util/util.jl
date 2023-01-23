@@ -2,26 +2,31 @@ using LinearAlgebra
 
 
 function sqrtm(M::AbstractMatrix)
-    "https://en.wikipedia.org/wiki/Square_root_of_a_2_by_2_matrix"
+    "Square root of matrix"
 
-    if size(M) !== (2,2); error("Matrix must be 2x2"); end
+    if size(M) == (2,2)
+        "https://en.wikipedia.org/wiki/Square_root_of_a_2_by_2_matrix"
 
-    A,C,B,D = M
+        A,C,B,D = M
 
-    # Determinant
-    δ = A*D - B*C
-    s = sqrt(δ)
+        # Determinant
+        δ = A*D - B*C
+        s = sqrt(δ)
 
-    # Trace
-    τ = A+D
-    t = sqrt(τ + 2s)
+        # Trace
+        τ = A+D
+        t = sqrt(τ + 2s)
 
-    return 1/t*(M+s*Matrix{eltype(M)}(I,2,2))
+        return 1/t*(M+s*Matrix{eltype(M)}(I,2,2))
+    else
+        return cholesky(M).U
+    end
 end
 
-function project2posdef!(S::AbstractMatrix)
+function proj2psd!(S::AbstractMatrix)
     L,V = eigen(S)
-    return V*diagm(max.(0.0,L))*V'
+    S = V*diagm(max.(1e-8,L))*V'
+    return (S+S')/2
 end
 
 function sigma_points(m::AbstractVector, P::AbstractMatrix; α=1e-3, κ=0.0)
