@@ -19,7 +19,16 @@ function sqrtm(M::AbstractMatrix)
 
         return 1/t*(M+s*Matrix{eltype(M)}(I,2,2))
     else
-        return cholesky(M).U
+        "Babylonian method"
+
+        Xk = Matrix{eltype(M)}(I,size(M))
+        Xm = zeros(eltype(M), size(M))
+
+        while sum(abs.(Xk[:] .- Xm[:])) > 1e-3
+            Xm = Xk
+            Xk = (Xm + M/Xm)/2.0
+        end
+        return Xk
     end
 end
 
